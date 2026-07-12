@@ -1,0 +1,14 @@
+# Extra dependencies for finetune/ ONLY — intentionally NOT merged into the
+# top-level requirements.txt / Docker image, since this is an isolated,
+# optional experiment (Prompt 8B) that must never affect the hackathon
+# submission's image size or runtime dependencies.
+#
+# --dry-run mode (finetune/train.py) only needs torch. Real mode needs the
+# full set below.
+
+torch>=2.1
+
+# Real mode only (finetune/train.py without --dry-run):
+transformers>=4.40
+peft>=0.10
+accelerate>=0.30
