@@ -1,0 +1,26 @@
+[
+  {
+    "task_id": "v1",
+    "captions": {
+      "formal": "Traffic blurs through an impressionistic cityscape lined with autumn trees and distant mountains.",
+      "sarcastic": "Ah yes, traffic rendered as impressionist art — because regular gridlock lacked gravitas.",
+      "humorous_tech": "Render latency so high the city gave up and went full impressionism.",
+      "humorous_non_tech": "Somewhere an art collector would pay millions for what's really just Wednesday rush hour."
+    }
+  },
+  {
+    "task_id": "v2",
+    "captions": {
+      "formal": "An orange kitten sits among foliage, looking around as dappled sunlight filters through the leaves.",
+      "humorous_non_tech": "Fully convinced he's an invisible jungle predator. The leaves are not cooperating."
+    }
+  },
+  {
+    "task_id": "v3",
+    "captions": {
+      "sarcastic": "Person at desk, typing, glancing at screen. The office plant has seen this all before.",
+      "humorous_tech": "Me looking at my keyboard after `git push --force` on main.",
+      "humorous_non_tech": "Looking at her hands like they just sent that email without permission."
+    }
+  }
+]
