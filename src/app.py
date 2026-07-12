@@ -1,13 +1,20 @@
 import streamlit as st
 import asyncio
 import os
+import sys
 import tempfile
 import shutil
 from pathlib import Path
 import json
 
+# Ensure repo root is on sys.path so `from src import ...` works both locally
+# and on Streamlit Cloud (where CWD is the src/ directory, not the repo root).
+_repo_root = Path(__file__).resolve().parent.parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
+
 # Force loading .env file before importing our packages
-env_path = Path(__file__).resolve().parent.parent / ".env"
+env_path = _repo_root / ".env"
 if env_path.exists():
     for line in env_path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
