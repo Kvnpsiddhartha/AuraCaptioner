@@ -1,6 +1,6 @@
+# ffmpeg: required for video download, probe, downscale, frame extraction, and audio transcription
 ffmpeg
-libglib2.0-0
-libgomp1
+
+# OpenCV headless runtime dependencies (not bundled in the Python package)
 libsm6
-libxext6
 libxrender1
