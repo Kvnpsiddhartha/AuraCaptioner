@@ -55,6 +55,25 @@ def load_settings() -> Settings:
         if value:
             kwargs[field] = value
 
+    # Default to Gemma 4 models on Fireworks AI on-demand deployment.
+    # Gemma 4 31B IT: multimodal, 256K context, function calling — ideal for grounding & styling.
+    # Gemma 4 26B A4B IT: MoE model, efficient for evaluation/judging.
+    # Both require an on-demand deployment on Fireworks (not serverless).
+    # See: https://fireworks.ai/models/fireworks/gemma-4-31b-it
+    if "grounding_model" not in kwargs:
+        kwargs["grounding_model"] = "accounts/fireworks/models/gemma-4-31b-it"
+    if "styling_model" not in kwargs:
+        kwargs["styling_model"] = "accounts/fireworks/models/gemma-4-31b-it"
+    if "judge_model" not in kwargs:
+        kwargs["judge_model"] = "accounts/fireworks/models/gemma-4-26b-a4b-it"
+
+    if "secondary_grounding_model" not in kwargs:
+        kwargs["secondary_grounding_model"] = "accounts/fireworks/models/gemma-4-26b-a4b-it"
+    if "secondary_styling_model" not in kwargs:
+        kwargs["secondary_styling_model"] = "accounts/fireworks/models/gemma-4-26b-a4b-it"
+    if "secondary_judge_model" not in kwargs:
+        kwargs["secondary_judge_model"] = "accounts/fireworks/models/gemma-4-31b-it"
+
     int_env = {
         "max_runtime_seconds": "MAX_RUNTIME_SECONDS",
         "frames_min": "FRAMES_MIN",

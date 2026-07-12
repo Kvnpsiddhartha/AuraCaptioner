@@ -26,7 +26,7 @@ MIN_TEXT_REGION_CANDIDATES = 6
 def _text_region_candidate_count(gray_image) -> int:
     import cv2
 
-    mser = cv2.MSER_create()
+    mser = cv2.MSER_create(max_variation=1.0)
     regions, _ = mser.detectRegions(gray_image)
     count = 0
     for region in regions:

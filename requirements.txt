@@ -47,3 +47,6 @@ openai>=1.0.0
 # Prompt 9 (hardening pass) - secondary-model fallback in grounding.py/
 # styling.py/judge.py and env-configurable concurrency in pipeline.py are
 # pure additions to existing modules - no new dependency needed.
+
+# Streamlit UI for web interface & Hugging Face Spaces hosting
+streamlit>=1.30.0
