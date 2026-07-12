@@ -93,12 +93,12 @@ st.markdown("""
 st.markdown("<h1 class='main-header'>🎬 AuraCaptioner</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-header'>Next-generation video captioning powered by Google Gemma 4 models on Fireworks AI.</p>", unsafe_allow_html=True)
 
-# Define Demo Videos
+# Official AMD Hackathon sample clips (same as the evaluation set examples)
 DEMO_VIDEOS = {
     "Select a Demo Video...": "",
-    "Bicycle & Car Detection (Sports/Traffic)": "https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/person-bicycle-car-detection.mp4",
-    "Car Traffic Flow (Street Scene)": "https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/car-detection.mp4",
-    "Short Testing Clip (Fast Download)": "https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/free-h264-video-for-testing.mp4"
+    "v1 — Urban Autumn Boulevard (City Traffic)": "https://storage.googleapis.com/amd-hackathon-clips/1860079-uhd_2560_1440_25fps.mp4",
+    "v2 — Orange Kitten in Garden (Nature)": "https://storage.googleapis.com/amd-hackathon-clips/13825391-uhd_3840_2160_30fps.mp4",
+    "v3 — Office Worker at Desktop (Technology)": "https://storage.googleapis.com/amd-hackathon-clips/3044693-uhd_3840_2160_24fps.mp4",
 }
 
 # Sidebar configuration
@@ -156,7 +156,7 @@ if video_url:
     st.video(video_url)
 
 # Button to trigger the pipeline
-run_clicked = st.button("🚀 Generate Captions with Gemma 4", disabled=(settings is None or not video_url or len(selected_styles) == 0))
+run_clicked = st.button("🚀 Generate Captions", disabled=(settings is None or not video_url or len(selected_styles) == 0))
 
 async def run_streamlit_pipeline(url, styles, config):
     workdir = Path(tempfile.mkdtemp(prefix="st_vcap_"))
