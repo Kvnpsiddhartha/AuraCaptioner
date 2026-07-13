@@ -1,52 +1,32 @@
-pydantic>=2
+pydantic>=2.0,<3
 
 # Prompt 3A (src/ingest.py) - video download
-requests>=2.31
+requests>=2.31,<3
 
 # Prompt 3B (src/sampling.py) - ffmpeg/ffprobe invoked via subprocess only,
 # no python binding needed. (ffmpeg/ffprobe binaries themselves are
 # installed via the Dockerfile.)
 
-# Prompt 3C (src/audio.py) - cheap VAD gate + Whisper transcription.
-# Both are imported lazily and guarded: if unavailable, has_speech()
-# returns False and transcribe() returns None rather than raising, so the
-# pipeline still runs (with reduced context) even in a stripped-down image.
-webrtcvad>=2.0.10
-faster-whisper>=1.0
+# Prompt 3C (src/audio.py) - faster-whisper and webrtcvad are intentionally
+# NOT installed in the evaluation image. Both are imported lazily and
+# guarded: if unavailable, has_speech() returns False and transcribe()
+# returns None. For Track 2 clips (nature/urban/sports/cooking) there is no
+# meaningful speech content that benefits captioning — skipping saves the
+# heavy CTranslate2 binary (~80 MB wheel) and eliminates the runtime
+# HuggingFace model download that would otherwise happen on first call.
+# To re-enable: pip install faster-whisper>=1.0 webrtcvad>=2.0.10
 
-# Prompt 3D (src/ocr.py) - cheap MSER text-region gate + real OCR.
-# opencv is used for the gate; rapidocr is imported lazily and guarded the
-# same way as faster-whisper above.
-opencv-python-headless>=4.9
-rapidocr-onnxruntime>=1.3
+# Prompt 3D (src/ocr.py) - opencv-python-headless and rapidocr-onnxruntime
+# are intentionally NOT installed in the evaluation image. opencv is used for
+# the MSER text-region gate; rapidocr is the heavy OCR engine. Both are
+# imported lazily and guarded: extract_text() returns [] on any import failure.
+# Track 2 clips do not require on-screen text extraction for accurate
+# VLM-grounded captions. Removing these saves ~100 MB of native binaries and
+# eliminates ONNX Runtime cold-start overhead.
+# To re-enable: pip install opencv-python-headless>=4.9 rapidocr-onnxruntime>=1.3
 
 # Prompt 4A/4B/4C (src/grounding.py, src/verification.py, src/styling.py) -
-# schema-enforced (tool-calling) LLM/VLM calls. All three modules import
-# this lazily (inside their public functions) and treat its absence as a
-# normal failure mode (GroundingError / passthrough VerificationResult /
-# fallback_caption respectively), so a stripped-down image without network
-# access still runs, just with degraded output.
-openai>=1.0.0
-
-# Prompt 6A (src/judge.py) - self-judge scoring. Reuses the anthropic
-# dependency above (schema-enforced tool-calling, same as grounding.py/
-# verification.py/styling.py) - no new dependency needed.
-
-# Prompt 5/7 (src/pipeline.py) - pure orchestration over the modules
-# above (stdlib asyncio/tempfile/shutil only) - no new dependency needed.
-
-# Prompt 8A (src/native_video.py) - isolated experimental native-video
-# grounding path. Reuses the anthropic dependency above; no new dependency.
-# NOT imported by pipeline.py, so it adds no runtime cost to the real image.
-
-# Prompt 8B (finetune/) - optional fine-tuning scaffold. Deliberately
-# isolated in finetune/requirements.txt instead of here: it pulls in
-# torch/transformers/peft, which must never bloat the main Docker image's
-# 10GB size budget for something that isn't part of the shipped pipeline.
-
-# Prompt 9 (hardening pass) - secondary-model fallback in grounding.py/
-# styling.py/judge.py and env-configurable concurrency in pipeline.py are
-# pure additions to existing modules - no new dependency needed.
-
-# Streamlit UI for web interface & Hugging Face Spaces hosting
-streamlit>=1.30.0
+# schema-enforced (tool-calling) LLM/VLM calls via the OpenAI-compatible
+# Fireworks AI endpoint. All three modules import this lazily and treat its
+# absence as a graceful failure mode.
+openai>=1.0.0,<2

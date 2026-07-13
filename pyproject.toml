@@ -1,17 +1,25 @@
 [project]
 name = "video-captioning-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "AuraCaptioner: Grounded multi-style video captioning agent"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.39",
-    "faster-whisper>=1.0",
-    "openai>=1.0.0",
-    "opencv-python-headless>=4.9",
-    "pydantic>=2",
-    "rapidocr-onnxruntime>=1.3",
-    "requests>=2.31",
+    "pydantic>=2.0,<3",
+    "requests>=2.31,<3",
+    "openai>=1.0.0,<2",
+]
+
+[project.optional-dependencies]
+# Install these for local dev / Streamlit UI / richer audio+OCR pipeline
+ui = ["streamlit>=1.30.0"]
+audio = ["faster-whisper>=1.0", "webrtcvad>=2.0.10"]
+ocr = ["opencv-python-headless>=4.9", "rapidocr-onnxruntime>=1.3"]
+dev = [
+    "pytest>=8",
     "streamlit>=1.30.0",
+    "faster-whisper>=1.0",
     "webrtcvad>=2.0.10",
+    "opencv-python-headless>=4.9",
+    "rapidocr-onnxruntime>=1.3",
 ]

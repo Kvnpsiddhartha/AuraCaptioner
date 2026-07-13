@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 # set at once. Prompt 9 hardening: overridable via MAX_CONCURRENT_TASKS
 # env var so this can be tuned per-provider without a code change, while
 # still falling back to a safe default if unset/invalid.
-_DEFAULT_MAX_CONCURRENT_TASKS = 6
+_DEFAULT_MAX_CONCURRENT_TASKS = 4
 
 
 def _max_concurrent_tasks() -> int:
@@ -71,7 +71,9 @@ def _max_concurrent_tasks() -> int:
 # runtime budget on a quality upgrade that was never required for
 # correctness. judge_and_regenerate can roughly double/triple the LLM
 # calls for weak styles, so this needs real margin, not just "> 0".
-JUDGE_MIN_SECONDS_REQUIRED = 20.0
+# Raised from 20 → 45 s: judge + optional regen can cost ~30-60 s per task;
+# skipping it when fewer than 45 s remain is the safer tradeoff.
+JUDGE_MIN_SECONDS_REQUIRED = 45.0
 
 
 def _fallback_task_result(task: Task, settings: Settings) -> TaskResult:
@@ -181,16 +183,22 @@ async def _run_task_inner(
         # verify_facts already never raises (internally passes facts
         # through unmodified on failure), but wrap anyway per the
         # project's "every stage wrapped" rule.
+        # Gated on settings.enable_verification (default False) because the
+        # 3 sequential LLM sub-steps add ~90-135 s per task — too costly
+        # under a 10-minute container budget with multiple clips.
         cleaned_facts = facts
-        try:
-            verification_result = await verification.verify_facts(facts, frames, settings)
-            cleaned_facts = verification_result.cleaned_facts
-        except Exception as exc:
-            logger.warning(
-                "task_id=%s: verification raised unexpectedly, using ungrounded facts: %s",
-                task.task_id, exc,
-            )
-            cleaned_facts = facts
+        if settings.enable_verification:
+            try:
+                verification_result = await verification.verify_facts(facts, frames, settings)
+                cleaned_facts = verification_result.cleaned_facts
+            except Exception as exc:
+                logger.warning(
+                    "task_id=%s: verification raised unexpectedly, using ungrounded facts: %s",
+                    task.task_id, exc,
+                )
+                cleaned_facts = facts
+        else:
+            logger.debug("task_id=%s: verification skipped (ENABLE_VERIFICATION=false)", task.task_id)
 
         # --- Stage: styling ----------------------------------------------------
         try:
@@ -205,8 +213,13 @@ async def _run_task_inner(
         # outright if too little time remains before the overall
         # deadline, since this can roughly double/triple the LLM calls
         # for weak styles.
+        # Gated on settings.enable_judge (default True); set ENABLE_JUDGE=false
+        # to skip entirely when the runtime budget is dangerously tight.
         time_remaining = None if deadline is None else deadline - time.monotonic()
-        if time_remaining is not None and time_remaining < JUDGE_MIN_SECONDS_REQUIRED:
+        judge_time_ok = time_remaining is None or time_remaining >= JUDGE_MIN_SECONDS_REQUIRED
+        if not settings.enable_judge:
+            logger.debug("task_id=%s: judge skipped (ENABLE_JUDGE=false)", task.task_id)
+        elif not judge_time_ok:
             logger.info(
                 "task_id=%s: skipping judge step, only %.1fs left before deadline",
                 task.task_id, time_remaining,
