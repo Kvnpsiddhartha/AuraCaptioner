@@ -26,9 +26,9 @@ class Settings(BaseModel):
     judge_model: str = "accounts/fireworks/models/gpt-oss-120b"
 
     # Optional secondary models for provider/rate-limit fallback (Phase 6 / Prompt 9).
-    secondary_grounding_model: str | None = None
-    secondary_styling_model: str | None = None
-    secondary_judge_model: str | None = None
+    secondary_grounding_model: str | None = "accounts/fireworks/models/kimi-k2p6"
+    secondary_styling_model: str | None = "accounts/fireworks/models/deepseek-v4-pro"
+    secondary_judge_model: str | None = "accounts/fireworks/models/gpt-oss-120b"
 
     fallback_caption: str = "A short video clip."
     max_self_judge_retries: int = 2
@@ -55,24 +55,6 @@ def load_settings() -> Settings:
         if value:
             kwargs[field] = value
 
-    # Default to Gemma 4 models on Fireworks AI on-demand deployment.
-    # Gemma 4 31B IT: multimodal, 256K context, function calling — ideal for grounding & styling.
-    # Gemma 4 26B A4B IT: MoE model, efficient for evaluation/judging.
-    # Both require an on-demand deployment on Fireworks (not serverless).
-    # See: https://fireworks.ai/models/fireworks/gemma-4-31b-it
-    if "grounding_model" not in kwargs:
-        kwargs["grounding_model"] = "accounts/fireworks/models/gemma-4-31b-it"
-    if "styling_model" not in kwargs:
-        kwargs["styling_model"] = "accounts/fireworks/models/gemma-4-31b-it"
-    if "judge_model" not in kwargs:
-        kwargs["judge_model"] = "accounts/fireworks/models/gemma-4-26b-a4b-it"
-
-    if "secondary_grounding_model" not in kwargs:
-        kwargs["secondary_grounding_model"] = "accounts/fireworks/models/gemma-4-26b-a4b-it"
-    if "secondary_styling_model" not in kwargs:
-        kwargs["secondary_styling_model"] = "accounts/fireworks/models/gemma-4-26b-a4b-it"
-    if "secondary_judge_model" not in kwargs:
-        kwargs["secondary_judge_model"] = "accounts/fireworks/models/gemma-4-31b-it"
 
     int_env = {
         "max_runtime_seconds": "MAX_RUNTIME_SECONDS",

@@ -58,6 +58,10 @@ def main() -> int:
         print(f"[main] FATAL: configuration error: {exc}", file=sys.stderr)
         return 1
 
+    # Emit a startup marker so the AMD test harness (-ReadyPattern 'healthy|ready')
+    # can confirm the container is alive and measure startup latency.
+    print("[READY] AuraCaptioner started", flush=True)
+
     try:
         tasks = _read_tasks(INPUT_PATH)
     except Exception:
